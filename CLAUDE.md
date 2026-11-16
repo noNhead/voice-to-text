@@ -17,4 +17,5 @@
 кроме скачивания моделей с проверкой SHA-256 и localhost; в аудиопотоке нет аллокаций и блокировок; без Electron/Tauri.
 
 Команды: `cargo build --workspace`, `cargo test --workspace`,
-`cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --all`, `cargo deny check`.
+`cargo clippy --workspace --all-targets -- -D warnings`, `cargo fmt --all`, `cargo deny check`,
+`cargo xtask third-party` (после изменения зависимостей: список библиотек в README и THIRD_PARTY_LICENSES.md).

@@ -112,6 +112,9 @@ IPC-протокол внешних плагинов, JSON-схема событ
 - [ ] `cargo clippy --workspace --all-targets -- -D warnings`
 - [ ] `cargo test --workspace` (+ golden/bench, если тронуты качество или горячий путь)
 - [ ] `cargo deny check` (новые зависимости — запись в `docs/STACK.md`)
+- [ ] Изменились зависимости (`Cargo.lock`) → `cargo xtask third-party`: обновляет список библиотек в README и
+      тексты лицензий в `THIRD_PARTY_LICENSES.md`. MIT/BSD/Apache требуют прикладывать их к каждому релизу;
+      `cargo xtask third-party --check` в CI падает, если файлы устарели.
 - [ ] Нет аллокаций и блокировок в аудиопотоке, нет логирования текста речи на `info`+, нет новых сетевых вызовов.
 - [ ] Новый `unsafe` — только в разрешённых крейтах, с `// SAFETY:`.
 - [ ] Затронуты сервер/файлы/сеть/модели/секреты/IPC/FFI → пройден скилл `security`.

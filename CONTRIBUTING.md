@@ -28,5 +28,8 @@ cargo deny check
   [.claude/skills/security/SKILL.md](.claude/skills/security/SKILL.md).
 - Новая зависимость = обоснование в PR (лицензия, размер, число транзитивных зависимостей, альтернативы) и запись
   в [docs/STACK.md](docs/STACK.md). `cargo deny check` должен проходить.
+- После любого изменения зависимостей запустите `cargo xtask third-party`. Команда обновит таблицу библиотек в README
+  и тексты лицензий в [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md). Лицензии MIT, BSD и Apache-2.0 требуют
+  прикладывать уведомления об авторских правах к каждой копии, поэтому этот файл входит в каждый релиз.
 - Изменения горячего пути (аудио → VAD → ASR → MT) сопровождаются результатами бенчмарка `cargo bench` до и после.
 - Коммиты — [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `perf:`, `docs:` …).
