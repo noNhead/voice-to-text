@@ -28,7 +28,7 @@
 | Async-рантайм (сервер, выводы) | **tokio** (ограниченное число потоков) | — | MIT |
 | Захват звука Windows | **`wasapi`** (устройства, loopback) + **`windows`** (Process Loopback API, MMCSS) | `cpal` — для будущих Linux/macOS | MIT / MIT-Apache |
 | Кольцевой буфер для аудио | **`rtrb`** (lock-free SPSC, безопасен для real-time) | — | MIT/Apache |
-| Ресемплинг | **`rubato`** | — | MIT |
+| Ресемплинг | **средствами WASAPI**: запрашиваем сразу f32 моно 16 кГц (`AUTOCONVERTPCM` + `SRC_DEFAULT_QUALITY`) | `rubato` — для будущих платформ без этой возможности | — / MIT |
 | VAD | **Silero VAD** (ONNX, MIT) через **`ort`** (ONNX Runtime) | — | MIT/Apache |
 | Распознавание | **whisper.cpp** через **`whisper-rs`**: CPU (AVX2), **CUDA**, **Vulkan** (NVIDIA/AMD/Intel одним бэкендом) | **CTranslate2** через **`ct2rs`** — сравниваем в фазе 0 | MIT / Unlicense / MIT |
 | Перевод | **CTranslate2** через **`ct2rs`**: Opus-MT, M2M100, MADLAD-400 — один движок, много моделей | ONNX-экспорт Marian через `ort` (запасной путь, если сборка ct2rs окажется проблемной) | MIT |
@@ -90,6 +90,11 @@ Seamless (CC-BY-NC) не поддерживаются.
 Все три модели перевода работают на CTranslate2, поэтому это **один плагин и много моделей**.
 
 ## Оптимизации под Windows (проверяются замерами)
+
+Результаты замеров — в [BENCHMARKS.md](BENCHMARKS.md).
+
+- **Нет собственного ресемплинга.** Аудиодвижок Windows сам конвертирует формат и частоту устройства в f32 моно 16 кГц,
+  поэтому в нашем процессе нет ни ресемплера, ни отдельного dsp-шага ради конвертации.
 
 - Аудиопоток — **MMCSS** (`AvSetMmThreadCharacteristicsW("Audio")`), WASAPI в event-driven режиме, без аллокаций.
 - Потоки инференса — пониженный приоритет. Процесс — `BELOW_NORMAL_PRIORITY_CLASS`, чтобы игра и OBS выигрывали конкуренцию за CPU.

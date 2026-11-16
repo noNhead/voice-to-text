@@ -5,7 +5,8 @@
 ## Фаза 0 — прототипы и замеры (снятие рисков)
 - [x] Cargo workspace, `plugin-api` и чистая логика ядра (segmenter, stabilizer, hallucination) с тестами.
 - [ ] Silero VAD через `ort`: CPU на 32 мс блок, стабильность на шуме/музыке/игре.
-- [ ] WASAPI: захват микрофона, loopback вывода и **Process Loopback** конкретного процесса на Win10 22H2 и Win11; MMCSS; ноль потерь под нагрузкой (игра + OBS).
+- [x] WASAPI: захват микрофона, loopback вывода и **Process Loopback** конкретного процесса на Win10 22H2; MMCSS; утилита замеров `probe` ([результаты](BENCHMARKS.md)).
+- [ ] WASAPI: проверка на Win11, под нагрузкой (игра + запись OBS), при отключении и смене устройства, долгий прогон.
 - [ ] whisper.cpp (`whisper-rs`) против CTranslate2 (`ct2rs`): RTF, WER, RAM/VRAM на CPU, CUDA и Vulkan для base/small/large-v3-turbo.
 - [ ] CTranslate2 (`ct2rs`) для Opus-MT и M2M100: скорость и качество на 5 парах (ru-en, en-ru, en-de, en-ja через пивот, es-en). Проверить, что `ct2rs` нормально собирается на Windows (MSVC, CUDA); если нет — запасной путь через ONNX (`ort`).
 - [ ] Набор golden-аудио (речь, музыка, игра на фоне, тишина) с эталонными текстами.

@@ -1,0 +1,37 @@
+[package]
+name = "vtt-audio-win"
+description = "Захват звука в Windows (WASAPI): микрофон, loopback вывода, звук отдельного приложения"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+rtrb.workspace = true
+thiserror.workspace = true
+wasapi = "0.27"
+windows = { version = "0.62", features = [
+    "Win32_Foundation",
+    "Win32_System_ProcessStatus",
+    "Win32_System_Threading",
+    "Win32_System_WindowsProgramming",
+] }
+
+[dev-dependencies]
+hound = "3.5"
+rtrb.workspace = true
+
+# Единственный крейт ядра, где разрешён unsafe (FFI к WinAPI). Повторяем общие правила
+# workspace, но unsafe_code = "deny" (а не "forbid"), чтобы разрешать его точечно в модулях FFI.
+[lints.rust]
+unsafe_code = "deny"
+unreachable_pub = "warn"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+missing_errors_doc = "allow"
+cast_precision_loss = "allow"
+module_name_repetitions = "allow"
+undocumented_unsafe_blocks = "deny"

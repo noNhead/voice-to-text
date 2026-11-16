@@ -7,11 +7,11 @@ Recognizer (модель речь→текст), Translator (модель пер
 ## Конвейер
 
 ```
- ┌──────────────┐ PCM  ┌─────────┐ 16 кГц ┌─────┐ речь ┌───────────┐ окно ┌────────────────┐
- │ AudioCapture │─────▶│ Resampler│──────▶│ VAD │─────▶│ Segmenter │─────▶│ ⧉ Recognizer    │
- │ WASAPI: mic/ │ rtrb └─────────┘        └─────┘      └───────────┘      │   (плагин)     │
- │ loopback/app │                                                       └───────┬────────┘
- └──────────────┘                                                     Hypothesis │
+ ┌──────────────┐ f32 16 кГц ┌─────┐ речь ┌───────────┐ окно ┌────────────────┐
+ │ AudioCapture │───────────▶│ VAD │─────▶│ Segmenter │─────▶│ ⧉ Recognizer    │
+ │ WASAPI: mic/ │    rtrb    └─────┘      └───────────┘      │   (плагин)     │
+ │ loopback/app │                                            └───────┬────────┘
+ └──────────────┘                                          Hypothesis │
                                           ┌──────────────────────────────────────▼─────────┐
                                           │ Stabilizer (LocalAgreement-2, для batch)       │
                                           │ HallucinationFilter                            │
@@ -34,8 +34,7 @@ Recognizer (модель речь→текст), Translator (модель пер
 
 | Компонент | Ядро / плагин | Что делает |
 |---|---|---|
-| AudioCapture | ядро (`audio-win`) | WASAPI: устройства ввода, loopback вывода, Process Loopback конкретного приложения; MMCSS |
-| Resampler | ядро | `rubato`: любой формат устройства → f32 моно 16 кГц |
+| AudioCapture | ядро (`audio-win`) | WASAPI: устройства ввода, loopback вывода, Process Loopback конкретного приложения; MMCSS; сразу f32 моно 16 кГц (конвертирует аудиодвижок Windows); тишина в паузах loopback |
 | VAD | ядро | Silero (ONNX): в тишине модели не вызываются |
 | Segmenter | ядро | растущее окно для batch-моделей или куски для streaming-моделей; конец фразы |
 | **Recognizer** | **плагин** | одна модель: аудио → слова с таймингами |
@@ -58,7 +57,7 @@ Recognizer (модель речь→текст), Translator (модель пер
 | Поток | Приоритет | Что делает | Правило |
 |---|---|---|---|
 | `audio-<source>` (1 на источник) | MMCSS «Audio» | ждёт событие WASAPI, пишет PCM в `rtrb` | **никаких** аллокаций, блокировок, логов и syscalls, кроме WASAPI |
-| `dsp-<source>` | normal | ресемплинг, VAD, сегментация | блоки по 512 сэмплов (32 мс) |
+| `dsp-<source>` | normal | VAD, сегментация | блоки по 512 сэмплов (32 мс) |
 | `asr-<recognizer>` (1 на экземпляр) | below normal | вызывает Recognizer | внутри модель использует не больше `cpu_threads` |
 | `mt-<translator>` (1 на экземпляр) | below normal | вызывает Translator | батчит финальные сегменты |
 | tokio (1–2 потока) | below normal + EcoQoS | Server, Router, EventBus, Output | никакого тяжёлого кода; блокирующий I/O — через `spawn_blocking` |
@@ -143,11 +142,16 @@ tests/data/                   # эталонные WAV + тексты для gol
 
 | Тип | API | Примечание |
 |---|---|---|
-| Микрофон / любое устройство ввода | WASAPI shared, event-driven | формат устройства → `rubato` → 16 кГц |
+| Микрофон / любое устройство ввода | WASAPI shared, event-driven, `AUTOCONVERTPCM` | формат устройства → f32 моно 16 кГц силами Windows |
 | Весь системный звук | WASAPI loopback на устройстве вывода | — |
-| Отдельное приложение (Discord, игра, браузер) | **Process Loopback** (`ActivateAudioInterfaceAsync` + `AUDIOCLIENT_ACTIVATION_TYPE_PROCESS_LOOPBACK`) | Windows 10 2004+ (так же устроен «Захват звука приложения» в OBS); проверяется в фазе 0; режимы «включая/исключая дерево процессов» |
+| Отдельное приложение (Discord, игра, браузер) | **Process Loopback** (`ActivateAudioInterfaceAsync` + `AUDIOCLIENT_ACTIVATION_TYPE_PROCESS_LOOPBACK`) | Windows 10 2004+ (так же устроен «Захват звука приложения» в OBS); **проверено на Win10 22H2** ([замеры](BENCHMARKS.md)); захватывается процесс вместе с дочерними (`include_tree`) |
 
 Пользователь выбирает источник в UI: список устройств и запущенных приложений с активным звуком (через `IAudioSessionManager2`).
+
+Loopback (весь звук и Process Loopback) по документации WASAPI может не присылать пакеты, пока ничего не играет.
+Чтобы время потока шло и сегментатор видел паузы, поток захвата досыпает тишину, если пакетов нет дольше 100 мс.
+Досыпается только фактический пропуск, без сверки с часами всего потока, поэтому дрейф часов устройства не
+накапливается.
 
 ## Локальный сервер
 

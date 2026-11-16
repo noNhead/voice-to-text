@@ -39,7 +39,7 @@ model      = "large-v3-turbo-q5_0"   # модель из каталога пла
 ## Место плагинов в конвейере
 
 ```
- AudioCapture ─▶ Resampler ─▶ VAD ─▶ Segmenter ─▶ ⧉ RECOGNIZER ─▶ Stabilizer + HallucinationFilter
+ AudioCapture (f32 16 кГц) ─▶ VAD ─▶ Segmenter ─▶ ⧉ RECOGNIZER ─▶ Stabilizer + HallucinationFilter
                                                                               │ TextSegment
                                                                               ▼
                                         Router ── final ─▶ ⧉ TRANSLATOR(ы)  (пивот: ru→en→ja)

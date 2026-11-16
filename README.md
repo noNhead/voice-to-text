@@ -37,6 +37,7 @@ Linux и macOS — после v1.0.
 | [docs/PLUGINS.md](docs/PLUGINS.md) | плагины: трейты, внешние плагины, лицензионная политика |
 | [docs/OUTPUTS.md](docs/OUTPUTS.md) | все форматы вывода и их настройки |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | фазы разработки |
+| [docs/BENCHMARKS.md](docs/BENCHMARKS.md) | результаты замеров и команды для их повторения |
 | [SECURITY.md](SECURITY.md) | модель угроз и меры защиты |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | как участвовать в разработке |
 
