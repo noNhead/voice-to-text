@@ -123,6 +123,12 @@ impl<V: Vad> Segmenter<V> {
         }
     }
 
+    /// Детектор речи (например, чтобы прочитать его счётчики).
+    #[must_use]
+    pub fn vad(&self) -> &V {
+        &self.vad
+    }
+
     #[must_use]
     pub fn in_speech(&self) -> bool {
         self.in_speech

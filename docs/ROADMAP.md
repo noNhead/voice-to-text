@@ -4,7 +4,9 @@
 
 ## Фаза 0 — прототипы и замеры (снятие рисков)
 - [x] Cargo workspace, `plugin-api` и чистая логика ядра (segmenter, stabilizer, hallucination) с тестами.
-- [ ] Silero VAD через `ort`: CPU на 32 мс блок, стабильность на шуме/музыке/игре.
+- [x] Silero VAD на `tract`: совпадение с ONNX Runtime, скорость, сквозная проверка «захват → VAD → сегментатор» на живом звуке ([результаты](BENCHMARKS.md)).
+- [ ] VAD: стабильность на музыке, звуке игры и шуме (нужен набор golden-аудио); подбор порогов сегментатора.
+- [ ] Источник модели Silero для ModelManager: зафиксировать URL и SHA-256 (сейчас проверен экспорт v6 из faster-whisper, MIT); сравнить с официальным экспортом snakers4/silero-vad (другой интерфейс: `state`, `sr`).
 - [x] WASAPI: захват микрофона, loopback вывода и **Process Loopback** конкретного процесса на Win10 22H2; MMCSS; утилита замеров `probe` ([результаты](BENCHMARKS.md)).
 - [ ] WASAPI: проверка на Win11, под нагрузкой (игра + запись OBS), при отключении и смене устройства, долгий прогон.
 - [ ] whisper.cpp (`whisper-rs`) против CTranslate2 (`ct2rs`): RTF, WER, RAM/VRAM на CPU, CUDA и Vulkan для base/small/large-v3-turbo.

@@ -1,0 +1,25 @@
+[package]
+name = "vtt-vad"
+description = "Потоковый детектор речи Silero VAD на tract (чистый Rust, без нативных библиотек)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+repository.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+# Без `transformers`: для Silero эти операции не нужны, а зависимостей и размера они добавляют.
+tract-onnx = { version = "0.23", default-features = false }
+vtt-core = { path = "../core" }
+
+[dev-dependencies]
+hound = "3.5"
+
+[target.'cfg(windows)'.dev-dependencies]
+rtrb.workspace = true
+vtt-audio-win = { path = "../audio-win" }
+
+[lints]
+workspace = true

@@ -1,6 +1,6 @@
 ---
 name: security
-description: Информационная безопасность проекта voice-to-text — нативный Rust-переводчик речи для Windows с HTTP/WebSocket-сервером (axum) на localhost, скачиванием ML-моделей, FFI к whisper.cpp/CTranslate2/ONNX Runtime, WinAPI (WASAPI/COM), внешними плагинами-процессами и OBS-интеграцией. Используй ВСЕГДА при изменении server, auth, API, WebSocket, оверлея/тем, ModelManager, работы с файлами и путями, конфига и секретов, IPC внешних плагинов, unsafe/FFI, зависимостей и CI, а также при security-ревью и разборе сообщений об уязвимостях.
+description: Информационная безопасность проекта voice-to-text — нативный Rust-переводчик речи для Windows с HTTP/WebSocket-сервером (axum) на localhost, скачиванием ML-моделей, FFI к whisper.cpp/CTranslate2, ONNX-моделями (tract), WinAPI (WASAPI/COM), внешними плагинами-процессами и OBS-интеграцией. Используй ВСЕГДА при изменении server, auth, API, WebSocket, оверлея/тем, ModelManager, работы с файлами и путями, конфига и секретов, IPC внешних плагинов, unsafe/FFI, зависимостей и CI, а также при security-ревью и разборе сообщений об уязвимостях.
 ---
 
 # Информационная безопасность voice-to-text
@@ -23,7 +23,7 @@ description: Информационная безопасность проект�
 | Модели и скачивание | `crates/host` (ModelManager), `ModelSpec` в плагинах | C |
 | Файлы и пути | `plugins/output-*`, `app::config`, модуль путей | D |
 | Секреты и приватность | `server::auth`, `plugins/output-obs`, `tracing` | E |
-| `unsafe`, FFI, WinAPI | `crates/audio-win`, `crates/vad`, плагины-движки | F |
+| `unsafe`, FFI, WinAPI | `crates/audio-win`, плагины-движки | F |
 | Зависимости, CI, релизы | `Cargo.toml`, `Cargo.lock`, `deny.toml`, `.github/` | G |
 | Плагины: API, реестр, IPC | `crates/plugin-api`, `crates/host`, `plugins/*` | H |
 
@@ -78,7 +78,7 @@ description: Информационная безопасность проект�
 - [ ] Удаление «всего» удаляет и `live/`, и `transcripts/`.
 
 ## F. `unsafe`, FFI, WinAPI
-- [ ] `#![forbid(unsafe_code)]` во всех крейтах, кроме `audio-win`, `vad` и плагинов-движков.
+- [ ] `#![forbid(unsafe_code)]` во всех крейтах, кроме `audio-win` и плагинов-движков (`vad` работает на чистом Rust через `tract` и `unsafe` не содержит).
 - [ ] Каждый `unsafe` блок — минимальный, с `// SAFETY:` (какие инварианты, кто их гарантирует).
 - [ ] Буферы WASAPI: длина берётся из `GetBuffer`, данные копируются до `ReleaseBuffer`, проверяется формат (`WAVEFORMATEXTENSIBLE`), не предполагается f32.
 - [ ] COM: RAII-обёртки, `CoInitializeEx` на поток, все `HRESULT` проверяются.

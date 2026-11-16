@@ -35,6 +35,8 @@ const LICENSE_PREFIXES: &[&str] = &[
 ];
 
 type Res<T> = Result<T, Box<dyn std::error::Error>>;
+/// (имя файла, текст) лицензий одного пакета.
+type Texts = Vec<(String, String)>;
 
 #[derive(Deserialize)]
 struct Metadata {
@@ -213,6 +215,19 @@ fn third_party(check: bool) -> Res<()> {
     Ok(())
 }
 
+/// Ключ репозитория: без схемы, `.git`, завершающего `/` и в нижнем регистре.
+fn repo_key(url: &str) -> String {
+    let url = url
+        .trim()
+        .trim_end_matches('/')
+        .trim_end_matches(".git")
+        .to_lowercase();
+    match url.split_once("://") {
+        Some((_, rest)) => rest.to_owned(),
+        None => url,
+    }
+}
+
 /// Сравнение без учёта CRLF/LF: git на Windows может менять окончания строк.
 fn normalize(s: &str) -> String {
     s.replace("\r\n", "\n")
@@ -276,7 +291,7 @@ fn replace_section(readme: &str, section: &str) -> Res<String> {
 }
 
 /// Файлы лицензий пакета: `license_file` из Cargo.toml и LICENSE*/COPYING*/NOTICE* в корне пакета.
-fn license_texts(p: &Package) -> Res<Vec<(String, String)>> {
+fn license_texts(p: &Package) -> Res<Texts> {
     let dir = p.manifest_path.parent().unwrap_or(Path::new("."));
     let mut files: BTreeMap<String, PathBuf> = BTreeMap::new();
     if let Some(f) = &p.license_file {
@@ -305,16 +320,42 @@ fn licenses_file(shipped: &[&Package]) -> Res<(String, Vec<String>)> {
     // Одинаковые тексты (например, стандартный Apache-2.0) печатаются один раз со списком пакетов.
     let mut by_text: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
     let mut missing = Vec::new();
+    let mut texts_of: Vec<(&Package, Texts)> = Vec::new();
     for p in shipped {
-        let texts = license_texts(p)?;
-        if texts.is_empty() {
-            missing.push(format!("{} {}", p.name, p.version));
+        texts_of.push((p, license_texts(p)?));
+    }
+    // Если в пакете нет файла лицензии, берём файлы пакета из того же репозитория (например,
+    // `tract-extra` → `tract-core`): у крейтов одного репозитория общий LICENSE и copyright.
+    let by_repo: HashMap<String, (&Package, &Texts)> = texts_of
+        .iter()
+        .filter(|(_, t)| !t.is_empty())
+        .filter_map(|(p, t)| Some((repo_key(p.repository.as_deref()?), (*p, t))))
+        .collect();
+    for (p, texts) in &texts_of {
+        let label = format!("{} {}", p.name, p.version);
+        if !texts.is_empty() {
+            for (file, text) in texts {
+                by_text
+                    .entry(text.clone())
+                    .or_default()
+                    .insert(format!("{label} — {file}"));
+            }
+            continue;
         }
-        for (file, text) in texts {
-            by_text
-                .entry(text)
-                .or_default()
-                .insert(format!("{} {} — {file}", p.name, p.version));
+        let donor = p
+            .repository
+            .as_deref()
+            .map(repo_key)
+            .and_then(|k| by_repo.get(&k));
+        let Some((donor, donor_texts)) = donor else {
+            missing.push(label);
+            continue;
+        };
+        for (file, text) in *donor_texts {
+            by_text.entry(text.clone()).or_default().insert(format!(
+                "{label} — {file} (в пакете файла нет; взят из {} {} того же репозитория)",
+                donor.name, donor.version
+            ));
         }
     }
     let mut groups: Vec<(BTreeSet<String>, String)> = by_text

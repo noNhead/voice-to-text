@@ -1,6 +1,6 @@
 ---
 name: writing-code
-description: Правила написания и изменения кода в проекте voice-to-text — нативный переводчик речи в реальном времени на Rust для Windows (WASAPI, Silero VAD через ort, whisper.cpp через whisper-rs, CTranslate2 через ct2rs, axum, tokio, плагины Recognizer/Translator/Output). Используй ВСЕГДА, когда пишешь, рефакторишь или ревьюишь код этого проекта, добавляешь крейт, плагин, движок ASR/MT, источник звука, формат вывода, тему оверлея, тесты, бенчмарки или зависимость.
+description: Правила написания и изменения кода в проекте voice-to-text — нативный переводчик речи в реальном времени на Rust для Windows (WASAPI, Silero VAD через tract, whisper.cpp через whisper-rs, CTranslate2 через ct2rs, axum, tokio, плагины Recognizer/Translator/Output). Используй ВСЕГДА, когда пишешь, рефакторишь или ревьюишь код этого проекта, добавляешь крейт, плагин, движок ASR/MT, источник звука, формат вывода, тему оверлея, тесты, бенчмарки или зависимость.
 ---
 
 # Написание кода в voice-to-text (Rust)
@@ -25,7 +25,7 @@ description: Правила написания и изменения кода в
 ## 2. Стиль Rust
 - Edition 2024, MSRV = текущий stable из `rust-toolchain.toml`. `cargo fmt` (max_width 100), clippy `-D warnings` с
   `clippy::pedantic` (точечные `#[allow]` — с комментарием-причиной).
-- `#![forbid(unsafe_code)]` во всех крейтах, кроме `audio-win`, `vad` и плагинов-движков с FFI. Там `unsafe` живёт
+- `#![forbid(unsafe_code)]` во всех крейтах, кроме `audio-win` и плагинов-движков с FFI. Там `unsafe` живёт
   только в маленьких обёртках, и каждый блок снабжён комментарием `// SAFETY:` с инвариантами.
 - Ошибки: `thiserror` в библиотеках (свой `enum Error` на крейт), `anyhow` только в `app`. Никаких `unwrap()`/`expect()`
   вне тестов и доказуемо невозможных случаев (тогда `expect("причина")`). Паники не используются для управления потоком.

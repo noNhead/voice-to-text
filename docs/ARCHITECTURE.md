@@ -35,7 +35,7 @@ Recognizer (модель речь→текст), Translator (модель пер
 | Компонент | Ядро / плагин | Что делает |
 |---|---|---|
 | AudioCapture | ядро (`audio-win`) | WASAPI: устройства ввода, loopback вывода, Process Loopback конкретного приложения; MMCSS; сразу f32 моно 16 кГц (конвертирует аудиодвижок Windows); тишина в паузах loopback |
-| VAD | ядро | Silero (ONNX): в тишине модели не вызываются |
+| VAD | ядро (`vad`) | Silero v6 на `tract`, ~0.13 мс на блок 32 мс: в тишине модели распознавания не вызываются |
 | Segmenter | ядро | растущее окно для batch-моделей или куски для streaming-моделей; конец фразы |
 | **Recognizer** | **плагин** | одна модель: аудио → слова с таймингами |
 | Stabilizer | ядро | LocalAgreement-2: меняющиеся гипотезы → стабильный `partial` и `final` |
@@ -113,7 +113,7 @@ Cargo.toml                    # workspace, общие версии зависи�
 crates/
   plugin-api/                 # ПУБЛИЧНЫЙ API плагинов: трейты, типы, манифесты, валидация (semver)
   core/                       # segmenter, stabilizer, hallucination, router, bus — без зависимостей от ОС
-  vad/                        # Silero через ort
+  vad/                        # Silero VAD v6 на tract (чистый Rust, без unsafe)
   audio-win/                  # WASAPI, loopback, Process Loopback, MMCSS (cfg(windows))
   host/                       # реестр плагинов, ModelManager, внешние плагины (IPC)
   server/                     # axum, auth, WebMount, встроенная статика

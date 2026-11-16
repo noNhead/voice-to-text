@@ -29,7 +29,7 @@
 | Захват звука Windows | **`wasapi`** (устройства, loopback) + **`windows`** (Process Loopback API, MMCSS) | `cpal` — для будущих Linux/macOS | MIT / MIT-Apache |
 | Кольцевой буфер для аудио | **`rtrb`** (lock-free SPSC, безопасен для real-time) | — | MIT/Apache |
 | Ресемплинг | **средствами WASAPI**: запрашиваем сразу f32 моно 16 кГц (`AUTOCONVERTPCM` + `SRC_DEFAULT_QUALITY`) | `rubato` — для будущих платформ без этой возможности | — / MIT |
-| VAD | **Silero VAD** (ONNX, MIT) через **`ort`** (ONNX Runtime) | — | MIT/Apache |
+| VAD | **Silero VAD v6** (ONNX, MIT) через **`tract`** — чистый Rust, без DLL и без скачивания бинарников при сборке; точность совпадает с ONNX Runtime ([замеры](BENCHMARKS.md#детектор-речи-silero-vad-на-tract--2026-11-16)) | `ort` (ONNX Runtime) — если понадобится скорость: он на ~20 % быстрее | MIT/Apache |
 | Распознавание | **whisper.cpp** через **`whisper-rs`**: CPU (AVX2), **CUDA**, **Vulkan** (NVIDIA/AMD/Intel одним бэкендом) | **CTranslate2** через **`ct2rs`** — сравниваем в фазе 0 | MIT / Unlicense / MIT |
 | Перевод | **CTranslate2** через **`ct2rs`**: Opus-MT, M2M100, MADLAD-400 — один движок, много моделей | ONNX-экспорт Marian через `ort` (запасной путь, если сборка ct2rs окажется проблемной) | MIT |
 | Локальная LLM (опция) | HTTP к llama.cpp-server / Ollama на localhost через **`reqwest`** | — | MIT/Apache |
