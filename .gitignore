@@ -1,0 +1,8 @@
+/target/
+**/*.rs.bk
+# Модели и результаты замеров не коммитим
+/models/
+/bench-results/
+*.wav
+!tests/data/*.wav
+node_modules/
